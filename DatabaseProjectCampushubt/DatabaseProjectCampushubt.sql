@@ -1,4 +1,4 @@
-use campushubt;
+drop database campushubt;
 GO
 
 CREATE TABLE [dbo].[Users] (
@@ -634,7 +634,6 @@ CREATE NONCLUSTERED INDEX [IX_Stories_ExpiresAt] ON [dbo].[Stories] ([ExpiresAt]
 CREATE NONCLUSTERED INDEX [IX_Messages_RoomID_CreatedAt] ON [dbo].[Messages] ([RoomID], [CreatedAt] DESC);
 CREATE NONCLUSTERED INDEX [IX_UserRankings_TotalScore] ON [dbo].[UserRankings] ([TotalScore] DESC);
 
-
 CREATE TABLE [dbo].[Stories] (
     [StoryID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [UserID] BIGINT NOT NULL,
@@ -669,4 +668,9 @@ BEGIN
     ALTER TABLE [dbo].[Posts]
     ADD [Type] VARCHAR(20) CHECK (Type IN ('TEXT', 'IMAGE', 'VIDEO'));
 END
+GO
+
+-- Create indexes for Stories
+CREATE NONCLUSTERED INDEX [IX_Stories_UserID] ON [dbo].[Stories] ([UserID]);
+CREATE NONCLUSTERED INDEX [IX_StoryViews_StoryID] ON [dbo].[StoryViews] ([StoryID]);
 GO
