@@ -1,4 +1,6 @@
-drop database campushubt;
+use campushubt;
+GO
+
 CREATE TABLE [dbo].[Users] (
     [UserID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [Username] VARCHAR(50) UNIQUE NOT NULL,
@@ -20,15 +22,17 @@ CREATE TABLE [dbo].[Users] (
     [LastLogout] DATETIME,
     [IsDeleted] BIT DEFAULT 0
 );
+GO
 
 CREATE TABLE [dbo].[GroupCallParticipants] (
     [ParticipantID] INT IDENTITY (1, 1) NOT NULL,
     [GroupCallID]   INT NOT NULL,
-    [UserID]        INT NOT NULL,
+    [UserID]        BIGINT NOT NULL,
     PRIMARY KEY CLUSTERED ([ParticipantID] ASC),
     CONSTRAINT [FK_GroupCall] FOREIGN KEY ([GroupCallID]) REFERENCES [dbo].[GroupCalls] ([GroupCallID]) ON DELETE CASCADE,
     CONSTRAINT [FK_User_GroupCall] FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Messages] (
     [MessageID] BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -43,11 +47,12 @@ CREATE TABLE [dbo].[Messages] (
     FOREIGN KEY ([RoomID]) REFERENCES [dbo].[ChatRooms] ([RoomID]),
     FOREIGN KEY ([SenderID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Match_User] (
     [match_user_id] INT IDENTITY (1, 1) NOT NULL,
     [match_id]      INT NOT NULL,
-    [user_id]       INT NOT NULL,
+    [user_id]       BIGINT NOT NULL,
     [score]         INT NULL,
     [rank_position] INT NULL,
     PRIMARY KEY CLUSTERED ([match_user_id] ASC),
@@ -56,10 +61,11 @@ CREATE TABLE [dbo].[Match_User] (
     FOREIGN KEY ([match_id]) REFERENCES [dbo].[Match] ([match_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Ratings] (
     [rating_id] INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]   INT      NOT NULL,
+    [user_id]   BIGINT   NOT NULL,
     [course_id] INT      NOT NULL,
     [rating]    INT      NOT NULL,
     [comment]   TEXT     NULL,
@@ -69,10 +75,11 @@ CREATE TABLE [dbo].[Ratings] (
     FOREIGN KEY ([course_id]) REFERENCES [dbo].[Course] ([course_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Admin] (
     [admin_id]     INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]      INT      NOT NULL,
+    [user_id]      BIGINT   NOT NULL,
     [access_level] INT      NOT NULL,
     [created_at]   DATETIME DEFAULT (getdate()) NULL,
     [updated_at]   DATETIME DEFAULT (getdate()) NULL,
@@ -80,20 +87,22 @@ CREATE TABLE [dbo].[Admin] (
     CHECK ([access_level]>=(1) AND [access_level]<=(10)),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Shares] (
     [ShareID]   INT      IDENTITY (1, 1) NOT NULL,
     [Blog_ID]   INT      NOT NULL,
-    [UserID]    INT      NOT NULL,
+    [UserID]    BIGINT   NOT NULL,
     [ShareDate] DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([ShareID] ASC),
     CONSTRAINT [FK_Blog_Shares] FOREIGN KEY ([Blog_ID]) REFERENCES [dbo].[Blog] ([blog_id]),
     CONSTRAINT [FK_User_Shares] FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Comment] (
     [comment_id] INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]    INT      NOT NULL,
+    [user_id]    BIGINT   NOT NULL,
     [problem_id] INT      NOT NULL,
     [content]    TEXT     NOT NULL,
     [created_at] DATETIME DEFAULT (getdate()) NULL,
@@ -101,10 +110,11 @@ CREATE TABLE [dbo].[Comment] (
     FOREIGN KEY ([problem_id]) REFERENCES [dbo].[Problem] ([problem_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Blog] (
     [blog_id]    INT           IDENTITY (1, 1) NOT NULL,
-    [author_id]  INT           NOT NULL,
+    [author_id]  BIGINT        NOT NULL,
     [title]      VARCHAR (255) NOT NULL,
     [content]    TEXT          NOT NULL,
     [created_at] DATETIME      DEFAULT (getdate()) NULL,
@@ -113,10 +123,11 @@ CREATE TABLE [dbo].[Blog] (
     PRIMARY KEY CLUSTERED ([blog_id] ASC),
     FOREIGN KEY ([author_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Rank] (
     [rank_id]        INT            IDENTITY (1, 1) NOT NULL,
-    [user_id]        INT            NOT NULL,
+    [user_id]        BIGINT         NOT NULL,
     [category_id]    INT            NOT NULL,
     [total_score]    INT            NULL,
     [detailed_score] NVARCHAR (MAX) NULL,
@@ -128,10 +139,11 @@ CREATE TABLE [dbo].[Rank] (
     FOREIGN KEY ([category_id]) REFERENCES [dbo].[Category] ([category_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Submission] (
     [submission_id] INT          IDENTITY (1, 1) NOT NULL,
-    [user_id]       INT          NOT NULL,
+    [user_id]       BIGINT       NOT NULL,
     [problem_id]    INT          NOT NULL,
     [status]        VARCHAR (50) NOT NULL,
     [runtime]       INT          NULL,
@@ -151,6 +163,7 @@ CREATE TABLE [dbo].[Submission] (
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID]),
     CONSTRAINT [fk_submission_status] FOREIGN KEY ([status_id]) REFERENCES [dbo].[Submission_Status] ([status_id])
 );
+GO
 
 CREATE TABLE [dbo].[Problem] (
     [problem_id]    INT           IDENTITY (1, 1) NOT NULL,
@@ -170,28 +183,31 @@ CREATE TABLE [dbo].[Problem] (
     CHECK ([time_limit]>(0)),
     FOREIGN KEY ([category_id]) REFERENCES [dbo].[Category] ([category_id]) ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE [dbo].[Course] (
     [course_id]   INT           IDENTITY (1, 1) NOT NULL,
     [course_name] VARCHAR (255) NOT NULL,
     [description] TEXT          NULL,
-    [creator_id]  INT           NOT NULL,
+    [creator_id]  BIGINT        NOT NULL,
     [created_at]  DATETIME      DEFAULT (getdate()) NULL,
     [updated_at]  DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([course_id] ASC),
     FOREIGN KEY ([creator_id]) REFERENCES [dbo].[Users] ([UserID]) ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE [dbo].[Submission_Status] (
     [status_id] INT          IDENTITY (1, 1) NOT NULL,
     [status]    VARCHAR (50) NOT NULL,
     PRIMARY KEY CLUSTERED ([status_id] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[Assignment_Manager] (
     [manager_id]      INT      IDENTITY (1, 1) NOT NULL,
-    [manager_user_id] INT      NOT NULL,
-    [student_user_id] INT      NOT NULL,
+    [manager_user_id] BIGINT   NOT NULL,
+    [student_user_id] BIGINT   NOT NULL,
     [problem_id]      INT      NOT NULL,
     [assigned_at]     DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([manager_id] ASC),
@@ -199,11 +215,12 @@ CREATE TABLE [dbo].[Assignment_Manager] (
     FOREIGN KEY ([problem_id]) REFERENCES [dbo].[Problem] ([problem_id]),
     FOREIGN KEY ([student_user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Match_Rank] (
     [rank_id]       INT      IDENTITY (1, 1) NOT NULL,
     [match_id]      INT      NOT NULL,
-    [user_id]       INT      NOT NULL,
+    [user_id]       BIGINT   NOT NULL,
     [total_score]   INT      NULL,
     [rank_position] INT      NULL,
     [created_at]    DATETIME DEFAULT (getdate()) NULL,
@@ -214,19 +231,21 @@ CREATE TABLE [dbo].[Match_Rank] (
     FOREIGN KEY ([match_id]) REFERENCES [dbo].[Match] ([match_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Class] (
     [class_id]   INT           IDENTITY (1, 1) NOT NULL,
     [class_name] VARCHAR (255) NOT NULL,
-    [teacher_id] INT           NOT NULL,
+    [teacher_id] BIGINT        NOT NULL,
     [created_at] DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([class_id] ASC),
     FOREIGN KEY ([teacher_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Admin_Activity] (
     [activity_id] INT           IDENTITY (1, 1) NOT NULL,
-    [admin_id]    INT           NOT NULL,
+    [admin_id]    BIGINT        NOT NULL,
     [action]      VARCHAR (255) NOT NULL,
     [target_type] VARCHAR (50)  NOT NULL,
     [target_id]   INT           NULL,
@@ -235,11 +254,12 @@ CREATE TABLE [dbo].[Admin_Activity] (
     CHECK ([target_type]='Course' OR [target_type]='Problem' OR [target_type]='User'),
     FOREIGN KEY ([admin_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Blog_Comment] (
     [comment_id] INT          IDENTITY (1, 1) NOT NULL,
     [blog_id]    INT          NOT NULL,
-    [user_id]    INT          NOT NULL,
+    [user_id]    BIGINT       NOT NULL,
     [content]    TEXT         NOT NULL,
     [rank_flag]  VARCHAR (50) NULL,
     [created_at] DATETIME     DEFAULT (getdate()) NULL,
@@ -247,19 +267,21 @@ CREATE TABLE [dbo].[Blog_Comment] (
     FOREIGN KEY ([blog_id]) REFERENCES [dbo].[Blog] ([blog_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Error_Report] (
     [report_id]     INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]       INT      NOT NULL,
+    [user_id]       BIGINT   NOT NULL,
     [error_message] TEXT     NOT NULL,
     [created_at]    DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([report_id] ASC),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Course_Student] (
     [course_id]  INT          NOT NULL,
-    [student_id] INT          NOT NULL,
+    [student_id] BIGINT       NOT NULL,
     [joined_at]  DATETIME     DEFAULT (getdate()) NULL,
     [role]       VARCHAR (50) NOT NULL,
     PRIMARY KEY CLUSTERED ([course_id] ASC, [student_id] ASC),
@@ -267,15 +289,17 @@ CREATE TABLE [dbo].[Course_Student] (
     FOREIGN KEY ([course_id]) REFERENCES [dbo].[Course] ([course_id]),
     FOREIGN KEY ([student_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[PasswordReset] (
     [reset_id]    INT           IDENTITY (1, 1) NOT NULL,
-    [user_id]     INT           NOT NULL,
+    [user_id]     BIGINT        NOT NULL,
     [reset_token] VARCHAR (255) NOT NULL,
     [created_at]  DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([reset_id] ASC),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Submission_TestCase_Result] (
     [result_id]     INT          IDENTITY (1, 1) NOT NULL,
@@ -292,6 +316,7 @@ CREATE TABLE [dbo].[Submission_TestCase_Result] (
     FOREIGN KEY ([submission_id]) REFERENCES [dbo].[Submission] ([submission_id]) ON DELETE CASCADE,
     FOREIGN KEY ([testcase_id]) REFERENCES [dbo].[Problem_TestCase] ([testcase_id]) ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE [dbo].[GroupCalls] (
     [GroupCallID]   INT           IDENTITY (1, 1) NOT NULL,
@@ -300,6 +325,7 @@ CREATE TABLE [dbo].[GroupCalls] (
     [CallStatus]    NVARCHAR (50) NOT NULL,
     PRIMARY KEY CLUSTERED ([GroupCallID] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[Likes] (
     [LikeID] BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -313,27 +339,30 @@ CREATE TABLE [dbo].[Likes] (
     CONSTRAINT UQ_UserPost UNIQUE ([UserID], [PostID]),
     CONSTRAINT UQ_UserComment UNIQUE ([UserID], [CommentID])
 );
+GO
 
 CREATE TABLE [dbo].[User_Role] (
     [user_role_id] INT          IDENTITY (1, 1) NOT NULL,
-    [user_id]      INT          NOT NULL,
+    [user_id]      BIGINT       NOT NULL,
     [role]         VARCHAR (50) NOT NULL,
     PRIMARY KEY CLUSTERED ([user_role_id] ASC),
     CHECK ([role]='student' OR [role]='teacher' OR [role]='admin'),
     CONSTRAINT [chk_role] CHECK ([role]='admin' OR [role]='teacher' OR [role]='student'),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Notifications] (
     [notification_id] INT      IDENTITY (1, 1) NOT NULL,
     [course_id]       INT      NOT NULL,
-    [sender_id]       INT      NOT NULL,
+    [sender_id]       BIGINT   NOT NULL,
     [message]         TEXT     NOT NULL,
     [created_at]      DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([notification_id] ASC),
     FOREIGN KEY ([course_id]) REFERENCES [dbo].[Course] ([course_id]),
     FOREIGN KEY ([sender_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Groups] (
     [group_id]   INT           IDENTITY (1, 1) NOT NULL,
@@ -341,6 +370,7 @@ CREATE TABLE [dbo].[Groups] (
     [created_at] DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([group_id] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[Match] (
     [match_id]   INT          IDENTITY (1, 1) NOT NULL,
@@ -351,6 +381,7 @@ CREATE TABLE [dbo].[Match] (
     PRIMARY KEY CLUSTERED ([match_id] ASC),
     CHECK ([status]='Completed' OR [status]='Ongoing' OR [status]='Pending')
 );
+GO
 
 CREATE TABLE [dbo].[Category] (
     [category_id] INT           IDENTITY (1, 1) NOT NULL,
@@ -359,6 +390,7 @@ CREATE TABLE [dbo].[Category] (
     [created_at]  DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([category_id] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[Badge] (
     [badge_id]    INT           IDENTITY (1, 1) NOT NULL,
@@ -367,26 +399,29 @@ CREATE TABLE [dbo].[Badge] (
     [created_at]  DATETIME      DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([badge_id] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[GroupMembers] (
     [group_member_id] INT IDENTITY (1, 1) NOT NULL,
     [group_id]        INT NOT NULL,
-    [user_id]         INT NOT NULL,
+    [user_id]         BIGINT NOT NULL,
     PRIMARY KEY CLUSTERED ([group_member_id] ASC),
     FOREIGN KEY ([group_id]) REFERENCES [dbo].[Groups] ([group_id]) ON DELETE CASCADE,
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID]) ON DELETE CASCADE,
     CONSTRAINT [unique_group_user] UNIQUE NONCLUSTERED ([group_id] ASC, [user_id] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[User_Badge] (
     [user_badge_id] INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]       INT      NOT NULL,
+    [user_id]       BIGINT   NOT NULL,
     [badge_id]      INT      NOT NULL,
     [awarded_at]    DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([user_badge_id] ASC),
     FOREIGN KEY ([badge_id]) REFERENCES [dbo].[Badge] ([badge_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Problem_Language] (
     [problem_id] INT          NOT NULL,
@@ -395,6 +430,7 @@ CREATE TABLE [dbo].[Problem_Language] (
     CHECK ([language]='HTML/CSS' OR [language]='PHP' OR [language]='Swift' OR [language]='Go' OR [language]='JavaScript' OR [language]='C#' OR [language]='C++' OR [language]='C' OR [language]='Java' OR [language]='Python'),
     FOREIGN KEY ([problem_id]) REFERENCES [dbo].[Problem] ([problem_id]) ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE [dbo].[Problem_TestCase] (
     [testcase_id]     INT      IDENTITY (1, 1) NOT NULL,
@@ -406,41 +442,45 @@ CREATE TABLE [dbo].[Problem_TestCase] (
     PRIMARY KEY CLUSTERED ([testcase_id] ASC),
     FOREIGN KEY ([problem_id]) REFERENCES [dbo].[Problem] ([problem_id]) ON DELETE CASCADE
 );
+GO
 
 CREATE TABLE [dbo].[QnA] (
     [question_id] INT      IDENTITY (1, 1) NOT NULL,
-    [user_id]     INT      NOT NULL,
+    [user_id]     BIGINT   NOT NULL,
     [question]    TEXT     NOT NULL,
     [answer]      TEXT     NULL,
     [created_at]  DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([question_id] ASC),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Audit_Log] (
     [log_id]     INT           IDENTITY (1, 1) NOT NULL,
     [table_name] VARCHAR (255) NOT NULL,
     [action]     VARCHAR (50)  NOT NULL,
-    [user_id]    INT           NOT NULL,
+    [user_id]    BIGINT        NOT NULL,
     [timestamp]  DATETIME      DEFAULT (getdate()) NOT NULL,
     [changes]    TEXT          NULL,
     PRIMARY KEY CLUSTERED ([log_id] ASC),
     CONSTRAINT [FK_Audit_User] FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID]),
     CONSTRAINT [UQ_User_Table_Action] UNIQUE NONCLUSTERED ([user_id] ASC, [table_name] ASC, [action] ASC, [timestamp] ASC)
 );
+GO
 
 CREATE TABLE [dbo].[Class_Student] (
     [class_id]   INT      NOT NULL,
-    [student_id] INT      NOT NULL,
+    [student_id] BIGINT   NOT NULL,
     [joined_at]  DATETIME DEFAULT (getdate()) NULL,
     PRIMARY KEY CLUSTERED ([class_id] ASC, [student_id] ASC),
     FOREIGN KEY ([class_id]) REFERENCES [dbo].[Class] ([class_id]),
     FOREIGN KEY ([student_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Learning_Progress] (
     [progress_id]         INT          IDENTITY (1, 1) NOT NULL,
-    [user_id]             INT          NOT NULL,
+    [user_id]             BIGINT       NOT NULL,
     [course_id]           INT          NOT NULL,
     [problem_id]          INT          NULL,
     [status]              VARCHAR (50) NOT NULL,
@@ -452,8 +492,8 @@ CREATE TABLE [dbo].[Learning_Progress] (
     FOREIGN KEY ([problem_id]) REFERENCES [dbo].[Problem] ([problem_id]),
     FOREIGN KEY ([user_id]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
--- Posts table
 CREATE TABLE [dbo].[Posts] (
     [PostID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [UserID] BIGINT NOT NULL,
@@ -469,8 +509,8 @@ CREATE TABLE [dbo].[Posts] (
     [IsDeleted] BIT DEFAULT 0,
     FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
--- Comments with nested structure
 CREATE TABLE [dbo].[Comments] (
     [CommentID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [PostID] BIGINT NOT NULL,
@@ -485,8 +525,8 @@ CREATE TABLE [dbo].[Comments] (
     FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID]),
     FOREIGN KEY ([ParentCommentID]) REFERENCES [dbo].[Comments] ([CommentID])
 );
+GO
 
--- Follows table
 CREATE TABLE [dbo].[Follows] (
     [FollowID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [FollowerID] BIGINT NOT NULL,
@@ -496,8 +536,8 @@ CREATE TABLE [dbo].[Follows] (
     FOREIGN KEY ([FollowingID]) REFERENCES [dbo].[Users] ([UserID]),
     CONSTRAINT UQ_Follower_Following UNIQUE ([FollowerID], [FollowingID])
 );
+GO
 
--- Chat/Message system
 CREATE TABLE [dbo].[ChatRooms] (
     [RoomID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [Type] VARCHAR(20) CHECK (Type IN ('ONE_TO_ONE', 'GROUP')),
@@ -507,6 +547,7 @@ CREATE TABLE [dbo].[ChatRooms] (
     [CreatedBy] BIGINT,
     FOREIGN KEY ([CreatedBy]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[ChatRoomMembers] (
     [RoomID] BIGINT,
@@ -518,8 +559,8 @@ CREATE TABLE [dbo].[ChatRoomMembers] (
     FOREIGN KEY ([RoomID]) REFERENCES [dbo].[ChatRooms] ([RoomID]),
     FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
--- Video/Audio Calls
 CREATE TABLE [dbo].[Calls] (
     [CallID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [RoomID] BIGINT NOT NULL,
@@ -528,12 +569,12 @@ CREATE TABLE [dbo].[Calls] (
     [Status] VARCHAR(20) CHECK (Status IN ('ONGOING', 'COMPLETED', 'MISSED')),
     [StartTime] DATETIME DEFAULT GETDATE(),
     [EndTime] DATETIME,
-    [Duration] INT, -- in seconds
+    [Duration] INT,
     FOREIGN KEY ([RoomID]) REFERENCES [dbo].[ChatRooms] ([RoomID]),
     FOREIGN KEY ([InitiatorID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
--- Ranking and Achievement System
 CREATE TABLE [dbo].[UserRankings] (
     [RankingID] BIGINT IDENTITY(1,1) PRIMARY KEY,
     [UserID] BIGINT NOT NULL,
@@ -544,6 +585,7 @@ CREATE TABLE [dbo].[UserRankings] (
     [UpdatedAt] DATETIME DEFAULT GETDATE(),
     FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
 );
+GO
 
 CREATE TABLE [dbo].[Achievements] (
     [AchievementID] BIGINT IDENTITY(1,1) PRIMARY KEY,
@@ -553,6 +595,7 @@ CREATE TABLE [dbo].[Achievements] (
     [Category] VARCHAR(50),
     [RequiredScore] INT
 );
+GO
 
 CREATE TABLE [dbo].[UserAchievements] (
     [UserID] BIGINT,
@@ -591,3 +634,39 @@ CREATE NONCLUSTERED INDEX [IX_Stories_ExpiresAt] ON [dbo].[Stories] ([ExpiresAt]
 CREATE NONCLUSTERED INDEX [IX_Messages_RoomID_CreatedAt] ON [dbo].[Messages] ([RoomID], [CreatedAt] DESC);
 CREATE NONCLUSTERED INDEX [IX_UserRankings_TotalScore] ON [dbo].[UserRankings] ([TotalScore] DESC);
 
+
+CREATE TABLE [dbo].[Stories] (
+    [StoryID] BIGINT IDENTITY(1,1) PRIMARY KEY,
+    [UserID] BIGINT NOT NULL,
+    [Type] VARCHAR(20) CHECK (Type IN ('TEXT', 'IMAGE', 'VIDEO')),
+    [Content] TEXT,
+    [MediaUrl] VARCHAR(255),
+    [ViewsCount] INT DEFAULT 0,
+    [CreatedAt] DATETIME DEFAULT GETDATE(),
+    [ExpiresAt] DATETIME,
+    [IsDeleted] BIT DEFAULT 0,
+    FOREIGN KEY ([UserID]) REFERENCES [dbo].[Users] ([UserID])
+);
+GO
+
+CREATE TABLE [dbo].[StoryViews] (
+    [ViewID] BIGINT IDENTITY(1,1) PRIMARY KEY, 
+    [StoryID] BIGINT NOT NULL,
+    [ViewerID] BIGINT NOT NULL,
+    [ViewedAt] DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY ([StoryID]) REFERENCES [dbo].[Stories] ([StoryID]),
+    FOREIGN KEY ([ViewerID]) REFERENCES [dbo].[Users] ([UserID])
+);
+GO
+
+-- Add Type column to Posts table if not exists
+IF NOT EXISTS (
+    SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+    WHERE TABLE_NAME = 'Posts' 
+    AND COLUMN_NAME = 'Type'
+)
+BEGIN
+    ALTER TABLE [dbo].[Posts]
+    ADD [Type] VARCHAR(20) CHECK (Type IN ('TEXT', 'IMAGE', 'VIDEO'));
+END
+GO
