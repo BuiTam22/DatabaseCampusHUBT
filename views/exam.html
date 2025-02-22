@@ -1,0 +1,22 @@
+<head>
+    <script src="/assets/js/exam-monitor.js"></script>
+</head>
+
+<body>
+    <div id="exam-form">
+        <!-- Nội dung bài thi -->
+    </div>
+    
+    <script>
+        // Kiểm tra trước khi submit bài thi
+        document.querySelector('#exam-form').addEventListener('submit', function(e) {
+            if (isExamLocked) {
+                e.preventDefault();
+                alert('Bài thi đã bị khóa, bạn không thể nộp bài!');
+                return false;
+            }
+            // Cập nhật điểm trước khi gửi
+            document.querySelector('#final-score').value = getCurrentScore();
+        });
+    </script>
+</body> 
